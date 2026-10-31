@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modal Dialog Example</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <main id="main">
+    <p><a href="index.html">Back to all examples</a></p>
+    <h1>Modal dialog</h1>
+    <p>
+      Opening the dialog moves focus inside it. Tab and Shift+Tab stay inside the dialog,
+      Escape closes it, and focus returns to the button that opened it.
+    </p>
+
+    <button type="button" id="open-delete" aria-haspopup="dialog">Delete project</button>
+    <p id="dialog-result" role="status"></p>
+
+    <dialog id="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-desc">
+      <h2 id="delete-title">Delete this project?</h2>
+      <p id="delete-desc">The project and its 12 files will be removed. You cannot undo this.</p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" data-close="cancel" autofocus>Cancel</button>
+        <button type="button" data-close="confirm">Delete project</button>
+      </div>
+    </dialog>
+  </main>
+  <script type="module" src="js/dialog.js"></script>
+</body>
+</html>

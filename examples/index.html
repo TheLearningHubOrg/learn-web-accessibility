@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accessible Component Examples</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header>
+    <nav aria-label="Examples">
+      <ul>
+        <li><a href="dialog.html">Modal dialog</a></li>
+        <li><a href="tabs.html">Tabs</a></li>
+        <li><a href="form-errors.html">Form validation errors</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main id="main">
+    <h1>Accessible Component Examples</h1>
+    <p>
+      Each page below is a small, framework-free component built to WCAG 2.2 AA. They are
+      covered by an automated axe-core scan and by keyboard interaction tests written in Playwright.
+    </p>
+    <ul>
+      <li><a href="dialog.html">Modal dialog</a>: native <code>&lt;dialog&gt;</code>, focus moved in on open and restored on close.</li>
+      <li><a href="tabs.html">Tabs</a>: roving <code>tabindex</code>, arrow keys, Home and End.</li>
+      <li><a href="form-errors.html">Form validation errors</a>: error summary, inline messages and <code>aria-invalid</code>.</li>
+    </ul>
+  </main>
+</body>
+</html>

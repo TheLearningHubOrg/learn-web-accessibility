@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tabs Example</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <main id="main">
+    <p><a href="index.html">Back to all examples</a></p>
+    <h1>Tabs</h1>
+    <p>
+      Only the selected tab is in the Tab order. Use the Left and Right arrow keys to move
+      between tabs, Home for the first and End for the last.
+    </p>
+
+    <div class="tabs">
+      <div role="tablist" aria-label="Plan details">
+        <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+        <button type="button" role="tab" id="tab-pricing" aria-controls="panel-pricing" aria-selected="false" tabindex="-1">Pricing</button>
+        <button type="button" role="tab" id="tab-support" aria-controls="panel-support" aria-selected="false" tabindex="-1">Support</button>
+      </div>
+
+      <div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" tabindex="0">
+        <p>The Team plan includes shared workspaces, audit logs and single sign-on.</p>
+      </div>
+      <div role="tabpanel" id="panel-pricing" aria-labelledby="tab-pricing" tabindex="0" hidden>
+        <p>Billed per seat each month, with a discount for annual contracts.</p>
+      </div>
+      <div role="tabpanel" id="panel-support" aria-labelledby="tab-support" tabindex="0" hidden>
+        <p>Email support on business days, with a four-hour response target.</p>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="js/tabs.js"></script>
+</body>
+</html>
