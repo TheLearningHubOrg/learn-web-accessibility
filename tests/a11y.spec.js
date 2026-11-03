@@ -146,5 +146,6 @@ test.describe('form error handling', () => {
     await expect(page.locator('#error-summary')).toBeHidden();
     await expect(page.locator('[aria-invalid="true"]')).toHaveCount(0);
     await expect(page.getByRole('status')).toContainText('Account created');
+    await expect(page).not.toHaveTitle(/^Error: /);
   });
 });

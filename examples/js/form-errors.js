@@ -35,6 +35,7 @@ export function setupForm(form, summary, list, status) {
     }
     list.replaceChildren();
     status.textContent = '';
+    document.title = document.title.replace(/^Error: /, '');
 
     const invalid = Object.keys(errors);
     if (invalid.length === 0) {
@@ -62,7 +63,7 @@ export function setupForm(form, summary, list, status) {
       list.append(item);
     }
 
-    document.title = `Error: ${document.title.replace(/^Error: /, '')}`;
+    document.title = `Error: ${document.title}`;
     summary.hidden = false;
     summary.focus();
   });

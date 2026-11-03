@@ -203,7 +203,7 @@ SC 4.1.2 Name, Role, Value is the formal requirement that every custom control e
 ```
  Same pixels, different trees
 
- <div class="btn" onclick="save()">Save</div>      →  generic  "Save"        (not focusable, no role)
+ <div class="btn" onclick="save()">Save</div>         →  generic  "Save"        (not focusable, no role)
  <button type="button" onclick="save()">Save</button> →  button   "Save"        (focusable, Enter/Space work)
 ```
 
@@ -1196,10 +1196,11 @@ export default [
     ...jsxA11y.flatConfigs.strict,
     rules: {
       ...jsxA11y.flatConfigs.strict.rules,
-      // Teach the linter about design-system components that render native elements.
+      // Not part of the strict preset: every interactive control needs a text label.
       'jsx-a11y/control-has-associated-label': 'error',
     },
     settings: {
+      // Teach the linter about design-system components that render native elements.
       'jsx-a11y': {
         components: { Button: 'button', TextField: 'input', Link: 'a' },
       },
@@ -1213,20 +1214,24 @@ export default [
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe, toHaveNoViolations } from 'jest-axe';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { IconButton } from './IconButton';
 
 expect.extend(toHaveNoViolations);
 
 test('icon button has an accessible name and no axe violations', async () => {
-  const { container } = render(<IconButton icon="trash" label="Delete invoice" onPress={() => {}} />);
+  const user = userEvent.setup();
+  const onPress = vi.fn();
+  const { container } = render(<IconButton icon="trash" label="Delete invoice" onPress={onPress} />);
 
   // 1. Role + name query fails if the label is missing.
   const button = screen.getByRole('button', { name: 'Delete invoice' });
 
   // 2. Keyboard activation works with Space and Enter.
   button.focus();
-  await userEvent.keyboard('[Space]');
+  await user.keyboard('[Space]');
+  await user.keyboard('[Enter]');
+  expect(onPress).toHaveBeenCalledTimes(2);
 
   // 3. axe on the rendered fragment (color-contrast needs a real browser, so jsdom skips it).
   expect(await axe(container)).toHaveNoViolations();
@@ -1269,11 +1274,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       # 1. Install dependencies and only the browser we test against.
@@ -1287,7 +1292,7 @@ jobs:
 
       # 3. Keep traces for failed tests so reviewers can replay focus problems.
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-traces
           path: test-results/
@@ -1327,7 +1332,7 @@ learn-web-accessibility/
 ├── scripts/serve.mjs         # zero-dependency static server (port 4173)
 ├── tests/a11y.spec.js        # axe-core WCAG 2.2 AA scans + keyboard specs
 ├── playwright.config.js
-└── Dockerfile                # runs the suite, then serves examples with nginx
+└── Dockerfile                # runs the suite, then serves examples with non-root nginx
 ```
 
 ```bash
@@ -1343,7 +1348,7 @@ npm test
 
 # 4. Build the production image: the build fails if any accessibility test fails
 docker build -t learn-web-accessibility .
-docker run --rm -p 8080:80 learn-web-accessibility
+docker run --rm -p 8080:8080 learn-web-accessibility   # then open http://localhost:8080
 ```
 
 ---
@@ -1411,7 +1416,7 @@ docker run --rm -p 8080:80 learn-web-accessibility
 > **Answer**: Content must be usable at a viewport width equivalent to 320 CSS px (a 1280 px window at 400% zoom) without scrolling in two dimensions, so normal text, forms and navigation must reflow into a single column. Content that needs two-dimensional layout for meaning or use, such as data tables, maps, diagrams and complex toolbars, is exempt. For tables, wrap the table in a focusable container with `overflow-x: auto`, `tabindex="0"`, a `role="region"` and an accessible name, so keyboard users can scroll it and screen reader users know what it is. Do not make the entire page scroll horizontally because of one table.
 
 #### Q13: How should your UI behave in Windows forced-colors (contrast themes) mode?
-> **Answer**: In forced-colors mode the operating system replaces author colors with a small user-chosen palette and drops background images and box shadows. Anything that communicated state only through background color or box-shadow disappears: selected tabs, focus rings, toggle states, custom checkboxes. Mitigations: use a `2px solid transparent` outline alongside box-shadow focus styles so a real outline appears; use borders, not just fills, for selected states; use system color keywords (`Highlight`, `CanvasText`, `ButtonText`) inside `@media (forced-colors: active)`; and keep SVG icons on `currentColor`. Test with an actual contrast theme or the DevTools forced-colors emulation.
+> **Answer**: In forced-colors mode the operating system replaces author colors with a small user-chosen palette, forces `box-shadow` and `text-shadow` to `none`, and removes gradient backgrounds (`url()` images are kept). Anything that communicated state only through background color or box-shadow disappears: selected tabs, focus rings, toggle states, custom checkboxes. Mitigations: use a `2px solid transparent` outline alongside box-shadow focus styles so a real outline appears; use borders, not just fills, for selected states; use system color keywords (`Highlight`, `CanvasText`, `ButtonText`) inside `@media (forced-colors: active)`; and keep SVG icons on `currentColor`. Test with an actual contrast theme or the DevTools forced-colors emulation.
 
 #### Q14: State the first rule of ARIA and give a real example where violating it caused a bug.
 > **Answer**: If a native element provides the semantics and behaviour you need, use it instead of adding ARIA. A common real bug: a team built a custom select from `<div role="listbox">` and `role="option"` elements to match a design, but omitted typeahead, Home and End, scrolling the active option into view and mobile screen reader support. iOS VoiceOver users could not choose a value at all, while a styled native `<select>` (increasingly customisable in CSS) would have worked everywhere. ARIA only changes what is announced; every behaviour behind that announcement becomes your code to maintain.
@@ -1456,7 +1461,7 @@ docker run --rm -p 8080:80 learn-web-accessibility
 > **Answer**: Choose from the evidence you have: customer feedback, support tickets, enterprise customer requirements and published screen reader usage surveys, since web analytics cannot (and should not) detect assistive technology. A defensible enterprise baseline is NVDA with Chrome and JAWS with Chrome on Windows, VoiceOver with Safari on iOS, and VoiceOver with Safari on macOS, adding TalkBack with Chrome for Android-heavy audiences. Each pairing has its own quirks because screen readers rely on the browser's accessibility API implementation. Justify it like browser support: a written support matrix, tested before each release for critical journeys, with defects triaged by the same severity model as other bugs.
 
 #### Q28: What are browse mode and focus mode, and why do they matter for custom widgets?
-> **Answer**: Windows screen readers such as NVDA and JAWS use browse mode to read documents with a virtual cursor, where single-letter keys navigate (H for headings, F for form fields). Focus mode passes keys straight to the page, which is needed for typing and for widget keyboard models. Screen readers switch to focus mode automatically when focus lands on an input or on an element with a widget role such as `tab`, `listbox` or `grid`. A custom widget built from `div`s with key handlers but no proper role keeps the user in browse mode, so the screen reader swallows the arrow keys and the widget appears broken.
+> **Answer**: Windows screen readers such as NVDA and JAWS use browse mode to read documents with a virtual cursor, where single-letter keys navigate (H for headings, F for form fields). Focus mode passes keys straight to the page, which is needed for typing and for widget keyboard models. Screen readers switch to focus mode automatically when focus lands on an input or on an element with a composite widget role such as `listbox`, `grid` or `tree` (tab lists vary: some screen readers stay in browse mode and let the user activate tabs with Enter or Space). A custom widget built from `div`s with key handlers but no proper role keeps the user in browse mode, so the screen reader swallows the arrow keys and the widget appears broken.
 
 #### Q29: Automated tools passed with zero violations. Is the page accessible?
 > **Answer**: Not necessarily. Engines like axe-core decide what is machine-verifiable: missing names, invalid ARIA, rendered contrast, missing language and duplicate ids referenced by ARIA. They cannot judge whether alt text is accurate, whether reading and focus order make sense, whether error messages are understandable, whether a widget's keyboard model works, or whether a flow is usable with a screen reader. Zero violations means the page is free of the detectable subset. Complete the picture with scripted keyboard tests, periodic manual audits against all A and AA criteria, and usability testing with disabled participants.
